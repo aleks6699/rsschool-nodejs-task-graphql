@@ -11,6 +11,10 @@ import { PrismaClient } from '@prisma/client';
 // import { Profile } from './types/profile.js';
 import { UUIDType } from './types/uuid.js';
 import { memberTypes, memberType } from './shema/memberType.js';
+import { users, user, deleteUser, changeUser, createUser } from './shema/user.js';
+import { changePost, createPost, deletePost, post, posts } from './shema/post.js';
+import { changeProfile, createProfile, deleteProfile, profile, profiles } from './shema/profile.js';
+
 
 
 
@@ -93,9 +97,28 @@ export const schema = new GraphQLSchema({
   query: new GraphQLObjectType({
     name: 'Query',
     fields: {
-      memberTypes: memberTypes,
-      memberType: memberType
-
+      memberTypes,
+      memberType,
+      users,
+      user,
+      posts,
+      post,
+      profiles,
+      profile
     },
-  })
+  }),
+  mutation: new GraphQLObjectType({
+    name: 'Mutation',
+    fields: {
+      createUser,
+      changeUser,
+      deleteUser,
+      createPost,
+      changePost,
+      deletePost,
+      // createProfile,
+      // changeProfile,
+      deleteProfile,
+    },
+  }),
 });

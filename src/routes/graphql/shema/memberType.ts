@@ -12,9 +12,9 @@ export const memberTypes = {
 export const memberType = {
   type: MemberType,
   args: {
-      id: { type: MemberTypeId },
+    id: { type: MemberTypeId },
   },
   resolve: (_root: any, args: { id: string }, context: { prisma: PrismaClient }) => {
-      return context.prisma.memberType.findFirst({ where: { id: args.id } });
+    return context.prisma.memberType.findUnique({ where: { id: args.id } });
   },
 }
