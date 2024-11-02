@@ -3,6 +3,7 @@ import { GraphQLInputObjectType, GraphQLObjectType, GraphQLString, GraphQLNonNul
 import { UUIDType } from "./uuid.js";
 import { Profile } from "./profile.js";
 import { Post } from "./post.js";
+import { PrismaClient } from "@prisma/client";
 
 
 export const CreateUserInput = new GraphQLInputObjectType({
@@ -13,55 +14,76 @@ export const CreateUserInput = new GraphQLInputObjectType({
   }
 })
 
-
-
-export const UserType = new GraphQLObjectType({
+export const UserType: GraphQLObjectType = new GraphQLObjectType({
   name: 'User',
   fields: () => ({
-    id: { type: UUIDType },
-    name: { type: GraphQLString },
-    balance: { type: GraphQLFloat },
-    posts: {
-      type: new GraphQLList(Post),
-      resolve: async (parent, _args, context) => {
-        const userPosts = await context.prisma.post.findMany({
-          where: { authorId: parent.id },
-        });
-        return userPosts;
-      },
-    },
+    id: { type: new GraphQLNonNull(UUIDType) },
+    name: { type: new GraphQLNonNull(GraphQLString) },
+    balance: { type: new GraphQLNonNull(GraphQLFloat) },
     profile: {
       type: Profile,
-      resolve: async (parent, _args, context) => {
-        const userProfile = await context.prisma.profile.findUnique({
-          where: { userId: parent.id },
-        });
-        return userProfile;
+      resolve: async (
+        { id }: { id: string },
+        _,
+        { prisma }: { prisma: PrismaClient },
+      ) => {
+        return prisma.profile.findUnique({ where: { userId: id } });
       },
     },
-
-    userSubscribedTo: {
-      type: new GraphQLList(UserType),
-      resolve: async (parent, _args, context) => {
-        const subscriptions = await context.prisma.subscribersOnAuthors.findMany({
-          where: { subscriberId: parent.id },
-          include: { author: true },
+    posts: {
+      type: new GraphQLNonNull(new GraphQLList(new GraphQLNonNull(Post))),
+      resolve: async (
+        { id }: { id: string },
+        _,
+        { prisma }: { prisma: PrismaClient },
+      ) => {
+        const result = await prisma.post.findMany({
+          where: {
+            authorId: id,
+          },
         });
-        return subscriptions.map((subscription) => subscription.author);
+        return result;
+      },
+    },
+    userSubscribedTo: {
+      type: new GraphQLNonNull(new GraphQLList(new GraphQLNonNull(UserType))),
+      resolve: async (
+        { id }: { id: string },
+        _,
+        { prisma }: { prisma: PrismaClient },
+      ) => {
+        const result = await prisma.subscribersOnAuthors.findMany({
+          where: {
+            subscriberId: id,
+          },
+          select: {
+            author: true,
+          },
+        });
+        return result.map((subscription) => subscription.author);
       },
     },
     subscribedToUser: {
-      type: new GraphQLList(UserType),
-      resolve: async (parent, _args, context) => {
-        const subscribers = await context.prisma.subscribersOnAuthors.findMany({
-          where: { authorId: parent.id },
-          include: { subscriber: true },
+      type: new GraphQLNonNull(new GraphQLList(new GraphQLNonNull(UserType))),
+      resolve: async (
+        { id }: { id: string },
+        _,
+        { prisma }: { prisma: PrismaClient },
+      ) => {
+        const result = await prisma.subscribersOnAuthors.findMany({
+          where: {
+            authorId: id,
+          },
+          select: {
+            subscriber: true,
+          },
         });
-        return subscribers.map((subscription) => subscription.subscriber);
+        return result.map((subscription) => subscription.subscriber);
       },
     },
   }),
 });
+
 
 export const ChangeUserInput = new GraphQLInputObjectType({
   name: 'CreateUserInput',

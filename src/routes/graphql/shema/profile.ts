@@ -30,7 +30,7 @@ export const deleteProfile = {
   args: {
     id: { type: UUIDType },
   },
-  resolve: (root, args: { id: string }, context: PrismaClient) => {
+  resolve: (_root, args: { id: string }, context: PrismaClient) => {
     const { id } = args;
     return context.profile.delete({ where: { id } });
   },

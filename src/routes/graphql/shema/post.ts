@@ -37,7 +37,7 @@ export const createPost = {
     content: { type: GraphQLString },
     authorId: { type: UUIDType },
   },
-  resolve: async (root, args: { title: string, content: string, authorId: string }, context: PrismaClient) => {
+  resolve: async (_root, args: { title: string, content: string, authorId: string }, context: PrismaClient) => {
     return context.post.create({ data: args });
   },
 }
@@ -49,7 +49,7 @@ export const changePost = {
     content: { type: GraphQLString },
     authorId: { type: UUIDType },
   },
-  resolve: async (root, args: { id: string, title: string, content: string }, context: PrismaClient) => {
+  resolve: async (_root, args: { id: string, title: string, content: string }, context: PrismaClient) => {
     const { id, title, content } = args;
     return context.post.update({
       where: { id }, 
