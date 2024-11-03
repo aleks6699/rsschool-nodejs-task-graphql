@@ -1,8 +1,7 @@
-import { GraphQLBoolean, GraphQLInt, GraphQLList } from "graphql";
-import { Profile } from "../types/profile.js";
+import {  GraphQLList, GraphQLString } from "graphql";
+import { ChangeProfileInput, CreateProfileInput, Profile } from "../types/profile.js";
 import { PrismaClient } from "@prisma/client";
 import { UUIDType } from "../types/uuid.js";
-import { MemberTypeId } from "../../member-types/schemas.js";
 
 
 
@@ -25,41 +24,41 @@ export const profile = {
   },
 }
 
-export const deleteProfile = {
+ export const createProfile = {
   type: Profile,
   args: {
-    id: { type: UUIDType },
+    dto: { type:  CreateProfileInput }
   },
-  resolve: (_root, args: { id: string }, context: PrismaClient) => {
-    const { id } = args;
-    return context.profile.delete({ where: { id } });
-  },
+  resolve: async (_root, args: { dto: { isMale: boolean; yearOfBirth: number; userId: string; memberTypeId: string; } }, context: { prisma: PrismaClient }) => {
+    return await context.prisma.profile.create({ data: args.dto });
+  }
 }
-export const createProfile = {
-  type: Profile,
-  args: {
-    isMale: { type: GraphQLBoolean },
-    yearOfBirth: { type: GraphQLInt },
-    userId: { type: UUIDType },
-    memberTypeId: { type: MemberTypeId },
-  },
-  resolve: async (root, args: { isMale: boolean, yearOfBirth: number, userId: string, memberTypeId: MemberTypeId }, context: PrismaClient) => {
-    return context.profile.create({ data: args });
-  },
-}
+
+
+
+
 export const changeProfile = {
   type: Profile,
   args: {
     id: { type: UUIDType },
-    isMale: { type: GraphQLBoolean },
-    yearOfBirth: { type: GraphQLInt },
-    memberTypeId: { type: MemberTypeId },
+    dto: { type: ChangeProfileInput },
   },
-  resolve: async (root, args: { id: string, isMale: boolean, yearOfBirth: number, memberTypeId: MemberTypeId }, context: PrismaClient) => {
-    const { id, isMale, yearOfBirth, memberTypeId } = args;
-    return context.profile.update({
-      where: { id }, 
-      data: { isMale, yearOfBirth, memberTypeId }
-    });
+  resolve: async (_root, args: { dto: { isMale: boolean, yearOfBirth: number, memberTypeId: string }, id: string }, context: { prisma: PrismaClient }) => {
+    return await context.prisma.profile.update({ where: { id: args.id }, data: args.dto });
+
+  }
+}
+
+
+
+
+export const deleteProfile = {
+  type: GraphQLString,
+  args: {
+    id: { type: UUIDType },
   },
+  resolve: async (_root, args: { id: string }, context: { prisma: PrismaClient }) => {
+    await context.prisma.profile.delete({ where: { id: args.id } });
+    return null;
+  }
 }

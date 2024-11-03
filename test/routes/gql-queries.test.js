@@ -186,7 +186,6 @@ await test('gql-queries', async (t) => {
           }
       }`,
     });
-    console.log('dataUser:', dataUser);
 
     t.ok(dataUser.user.id === user1.id);
     t.ok(dataUser.user.profile.id === profile1.id);

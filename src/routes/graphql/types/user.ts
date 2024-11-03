@@ -13,7 +13,6 @@ export const CreateUserInput = new GraphQLInputObjectType({
     balance: { type: new GraphQLNonNull(GraphQLFloat) },
   }
 })
-
 export const UserType: GraphQLObjectType = new GraphQLObjectType({
   name: 'User',
   fields: () => ({
@@ -37,48 +36,35 @@ export const UserType: GraphQLObjectType = new GraphQLObjectType({
         _,
         { prisma }: { prisma: PrismaClient },
       ) => {
-        const result = await prisma.post.findMany({
-          where: {
-            authorId: id,
-          },
-        });
-        return result;
+        return prisma.post.findMany({ where: { authorId: id } });
       },
     },
     userSubscribedTo: {
       type: new GraphQLNonNull(new GraphQLList(new GraphQLNonNull(UserType))),
-      resolve: async (
-        { id }: { id: string },
-        _,
-        { prisma }: { prisma: PrismaClient },
-      ) => {
-        const result = await prisma.subscribersOnAuthors.findMany({
+      resolve: (obj, _args, { prisma }) => {
+        return prisma.user.findMany({
           where: {
-            subscriberId: id,
-          },
-          select: {
-            author: true,
+            subscribedToUser: {
+              some: {
+                subscriberId: obj.id,
+              },
+            },
           },
         });
-        return result.map((subscription) => subscription.author);
       },
     },
     subscribedToUser: {
       type: new GraphQLNonNull(new GraphQLList(new GraphQLNonNull(UserType))),
-      resolve: async (
-        { id }: { id: string },
-        _,
-        { prisma }: { prisma: PrismaClient },
-      ) => {
-        const result = await prisma.subscribersOnAuthors.findMany({
+      resolve: (obj, _args, { prisma }) => {
+        return prisma.user.findMany({
           where: {
-            authorId: id,
-          },
-          select: {
-            subscriber: true,
+            userSubscribedTo: {
+              some: {
+                authorId: obj.id,
+              },
+            },
           },
         });
-        return result.map((subscription) => subscription.subscriber);
       },
     },
   }),
@@ -86,7 +72,7 @@ export const UserType: GraphQLObjectType = new GraphQLObjectType({
 
 
 export const ChangeUserInput = new GraphQLInputObjectType({
-  name: 'CreateUserInput',
+  name: 'ChangeUserInput',
   fields: {
     name: { type: GraphQLString },
     balance: { type: GraphQLFloat },

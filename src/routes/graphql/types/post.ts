@@ -1,5 +1,5 @@
 import { UUIDType } from "./uuid.js";
-import { GraphQLInputObjectType, GraphQLObjectType, GraphQLString, GraphQLNonNull } from "graphql";
+import { GraphQLInputObjectType, GraphQLObjectType, GraphQLString } from "graphql";
 
 export const Post = new GraphQLObjectType({
   name: 'Post',
@@ -20,8 +20,8 @@ export const CreatePostInput = new GraphQLInputObjectType({
 
 })
 
-export const UpdatePostInput = new GraphQLInputObjectType({
-  name: 'UpdatePostInput',
+export const ChangePostInput = new GraphQLInputObjectType({
+  name: 'ChangePostInput',
   fields: {
     title: { type: GraphQLString },
     content: { type: GraphQLString },

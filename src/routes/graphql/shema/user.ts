@@ -1,9 +1,8 @@
-import { GraphQLFloat, GraphQLList, GraphQLNonNull, GraphQLObjectType, GraphQLString } from "graphql";
-import { UserType } from "../types/user.js";
+import { GraphQLFloat, GraphQLList, GraphQLNonNull,  GraphQLString } from "graphql";
+import { ChangeUserInput, CreateUserInput, UserType } from "../types/user.js";
 import { PrismaClient } from "@prisma/client";
 import { UUIDType } from "../types/uuid.js";
-import { Post } from "../types/post.js";
-import { Profile } from "../types/profile.js";
+
 
 
 
@@ -27,38 +26,36 @@ export const user = {
 }
 
 
-export const deleteUser = {
-  type: UserType,
-  args: {
-    id: { type: UUIDType },
-  },
-  resolve: (_root, args: { id: string }, context: PrismaClient) => {
-    const { id } = args;
-    return context.user.delete({ where: { id } });
-  },
-}
 export const createUser = {
   type: UserType,
   args: {
-    name: { type: GraphQLString },
-    balance: { type: GraphQLFloat },
+    dto: { type: CreateUserInput }
   },
-  resolve: async (root, args: { name: string, balance: number }, context: PrismaClient) => {
-    return context.user.create({ data: args });
+  resolve: async (_root, args: { dto: { name: string; balance: number; } }, context: { prisma: PrismaClient }) => {
+    return await context.prisma.user.create({ data: args.dto });
   },
 }
+
 export const changeUser = {
   type: UserType,
   args: {
     id: { type: UUIDType },
-    name: { type: GraphQLString },
-    balance: { type: GraphQLFloat },
+    dto: { type: ChangeUserInput },
   },
-  resolve: async (root, args: { id: string, name: string, balance: number }, context: PrismaClient) => {
-    const { id, name, balance } = args;
-    return context.user.update({
-      where: { id }, 
-      data: { name, balance }
-    });
+  resolve: async (_root, args: { dto: { name: string, balance: number }, id: string }, context: { prisma: PrismaClient }) => {
+    return await context.prisma.user.update({ where: { id: args.id }, data: args.dto });
+  }
+}
+
+
+
+export const deleteUser = {
+  type: GraphQLString,
+  args: {
+    id: { type: UUIDType },
   },
+  resolve: async (_root, args: { id: string }, context: { prisma: PrismaClient }) => {
+    await context.prisma.user.delete({ where: { id: args.id } });
+    return null;
+  }
 }
