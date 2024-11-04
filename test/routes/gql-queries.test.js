@@ -191,6 +191,7 @@ await test('gql-queries', async (t) => {
     t.ok(dataUser.user.profile.id === profile1.id);
     t.ok(dataUser.user.profile.memberType?.id === MemberTypeId.BASIC);
     t.ok(dataUser.user.posts[0].id === post1.id);
+    
 
     const foundUser1 = dataUsers.users.find((user) => user.id === user1.id);
     t.same(foundUser1, dataUser.user);
